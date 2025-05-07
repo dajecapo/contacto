@@ -73,14 +73,12 @@
     }
   });
 
-  // CONTADOR DE CARACTERES
   document.getElementById("mensaje").addEventListener("input", function () {
     document.getElementById("contadorMensaje").textContent = this.value.length;
   });
 
   window.onload = generarCaptcha;
 
-  // ENVÍO DEL FORMULARIO
   function enviarContacto(e) {
     e.preventDefault();
 
@@ -102,8 +100,9 @@
 
     const form = document.getElementById("contactoForm");
     const data = new FormData(form);
+    data.append("tipo", "contacto"); // ← ¡Conexión correcta a la hoja CONTACTO!
 
-    fetch("https://script.google.com/macros/s/AKfycbyF5VmLGYYk0gajYezoXuMxmNDkMUSIsMtrlLRXLSPElZyBohqZNZa99t2omUvFByY6/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbzb4ZvKX-6kpTni3cudJEs650tGoSEQNAPM9WuAhnXLcP0EJkpjvbmaI0u14Uqc6Za0/exec", {
       method: "POST",
       body: data
     })
