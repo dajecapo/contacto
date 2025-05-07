@@ -1,7 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sección Contáctanos</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fdfdfd;
+      color: #333;
+    }
+    section {
+      padding: 40px;
+    }
+    textarea {
+      resize: none;
+    }
+  </style>
+</head>
+<body>
+
 <!-- SECCIÓN: CONTÁCTANOS -->
-<section id="contacto" style="padding: 40px; background-color: #fdfdfd; font-family: 'Segoe UI', sans-serif;">
+<section id="contacto">
   <h2 style="text-align:center; font-size: 28px; color: #333;">Contáctanos</h2>
-  
   <div style="text-align:center; margin-bottom: 20px;">
     <button onclick="toggleContacto()" id="btnToggleContacto" style="background-color: #4caf50; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 6px; cursor: pointer;">Mostrar formulario</button>
   </div>
@@ -12,7 +33,7 @@
       <input type="text" name="nombre" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px;">
 
       <label style="font-weight: bold;">Teléfono (10 dígitos):</label>
-      <input type="tel" id="telefono" name="telefono" required pattern="\\d{10}" placeholder="Ej. 9991234567" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px;">
+      <input type="tel" id="telefono" name="telefono" required pattern="\d{10}" placeholder="Ej. 9991234567" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px;">
 
       <label style="font-weight: bold;">Email:</label>
       <input type="email" name="email" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px;">
@@ -39,89 +60,89 @@
 </section>
 
 <script>
-  function toggleContacto() {
-    const form = document.getElementById("formularioContacto");
-    const btn = document.getElementById("btnToggleContacto");
-    if (form.style.display === "none") {
-      form.style.display = "block";
-      btn.textContent = "Cerrar formulario";
-      btn.style.backgroundColor = "#f44336";
-    } else {
-      form.style.display = "none";
-      btn.textContent = "Mostrar formulario";
-      btn.style.backgroundColor = "#4caf50";
-    }
+function toggleContacto() {
+  const form = document.getElementById("formularioContacto");
+  const btn = document.getElementById("btnToggleContacto");
+  if (form.style.display === "none") {
+    form.style.display = "block";
+    btn.textContent = "Cerrar formulario";
+    btn.style.backgroundColor = "#f44336";
+  } else {
+    form.style.display = "none";
+    btn.textContent = "Mostrar formulario";
+    btn.style.backgroundColor = "#4caf50";
+  }
+}
+
+let captchaResultado;
+function generarCaptcha() {
+  const n1 = Math.floor(Math.random() * 9) + 1;
+  const n2 = Math.floor(Math.random() * 9) + 1;
+  captchaResultado = n1 + n2;
+  document.getElementById("captchaPregunta").textContent = `¿Cuánto es ${n1} + ${n2}?`;
+  document.getElementById("captchaRespuesta").value = '';
+  document.getElementById("captchaCheck").style.display = 'none';
+}
+
+document.getElementById("captchaRespuesta").addEventListener("input", function () {
+  const check = document.getElementById("captchaCheck");
+  if (parseInt(this.value) === captchaResultado) {
+    check.style.display = 'inline';
+  } else {
+    check.style.display = 'none';
+  }
+});
+
+document.getElementById("mensaje").addEventListener("input", function () {
+  document.getElementById("contadorMensaje").textContent = this.value.length;
+});
+
+window.onload = generarCaptcha;
+
+function enviarContacto(e) {
+  e.preventDefault();
+
+  const telefonoInput = document.getElementById("telefono");
+  const telefonoValido = /^\d{10}$/.test(telefonoInput.value);
+  if (!telefonoValido) {
+    alert("El teléfono debe tener exactamente 10 dígitos numéricos.");
+    telefonoInput.focus();
+    return;
   }
 
-  // CAPTCHA
-  let captchaResultado;
-  function generarCaptcha() {
-    const n1 = Math.floor(Math.random() * 9) + 1;
-    const n2 = Math.floor(Math.random() * 9) + 1;
-    captchaResultado = n1 + n2;
-    document.getElementById("captchaPregunta").textContent = `¿Cuánto es ${n1} + ${n2}?`;
-    document.getElementById("captchaRespuesta").value = '';
-    document.getElementById("captchaCheck").style.display = 'none';
+  const captchaInput = parseInt(document.getElementById("captchaRespuesta").value);
+  if (captchaInput !== captchaResultado) {
+    alert("Captcha incorrecto.");
+    return;
   }
 
-  document.getElementById("captchaRespuesta").addEventListener("input", function () {
-    const check = document.getElementById("captchaCheck");
-    if (parseInt(this.value) === captchaResultado) {
-      check.style.display = 'inline';
-    } else {
-      check.style.display = 'none';
-    }
+  const form = document.getElementById("contactoForm");
+  const data = new FormData(form);
+  data.append("tipo", "contacto");
+
+  fetch("https://script.google.com/macros/s/AKfycbzb4ZvKX-6kpTni3cudJEs650tGoSEQNAPM9WuAhnXLcP0EJkpjvbmaI0u14Uqc6Za0/exec", {
+    method: "POST",
+    body: data
+  })
+  .then(response => response.text())
+  .then(res => {
+    alert("Formulario enviado correctamente.");
+    const nombre = data.get("nombre");
+    const telefono = data.get("telefono");
+    const mensaje = encodeURIComponent(`¡Hola! Soy ${nombre}. Acabo de llenar el formulario de contacto. Mi número es ${telefono}.`);
+    window.open(`https://wa.me/5219991832064?text=${mensaje}`, '_blank');
+
+    form.reset();
+    document.getElementById("contadorMensaje").textContent = "0";
+    generarCaptcha();
+    document.getElementById("captchaCheck").style.display = "none";
+  })
+  .catch(err => {
+    alert("Error al enviar el formulario. Intenta de nuevo.");
+    console.error(err);
   });
-
-  document.getElementById("mensaje").addEventListener("input", function () {
-    document.getElementById("contadorMensaje").textContent = this.value.length;
-  });
-
-  window.onload = generarCaptcha;
-
-  function enviarContacto(e) {
-    e.preventDefault();
-
-    // Validación de teléfono
-    const telefonoInput = document.getElementById("telefono");
-    const telefonoValido = /^\d{10}$/.test(telefonoInput.value);
-    if (!telefonoValido) {
-      alert("El teléfono debe tener exactamente 10 dígitos numéricos.");
-      telefonoInput.focus();
-      return;
-    }
-
-    // Validación CAPTCHA
-    const captchaInput = parseInt(document.getElementById("captchaRespuesta").value);
-    if (captchaInput !== captchaResultado) {
-      alert("Captcha incorrecto.");
-      return;
-    }
-
-    const form = document.getElementById("contactoForm");
-    const data = new FormData(form);
-    data.append("tipo", "contacto"); // ← ¡Conexión correcta a la hoja CONTACTO!
-
-    fetch("https://script.google.com/macros/s/AKfycbzb4ZvKX-6kpTni3cudJEs650tGoSEQNAPM9WuAhnXLcP0EJkpjvbmaI0u14Uqc6Za0/exec", {
-      method: "POST",
-      body: data
-    })
-    .then(response => response.text())
-    .then(res => {
-      alert("Formulario enviado correctamente.");
-      form.reset();
-      document.getElementById("contadorMensaje").textContent = "0";
-      generarCaptcha();
-      document.getElementById("captchaCheck").style.display = "none";
-
-      const nombre = data.get("nombre");
-      const telefono = data.get("telefono");
-      const mensaje = encodeURIComponent(`¡Hola! Soy ${nombre}. Acabo de llenar el formulario de contacto. Mi número es ${telefono}.`);
-      window.open(`https://wa.me/5219991832064?text=${mensaje}`, '_blank');
-    })
-    .catch(err => {
-      alert("Error al enviar el formulario. Intenta de nuevo.");
-      console.error(err);
-    });
-  }
+}
 </script>
+
+</body>
+</html>
